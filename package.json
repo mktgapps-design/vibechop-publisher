@@ -1,0 +1,22 @@
+{
+  "name": "vibechop-publisher",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "npx tsx src/index.ts"
+  },
+  "dependencies": {
+    "@composio/core": "^0.10.0",
+    "@google-cloud/functions-framework": "^3.4.0",
+    "@google-cloud/storage": "^7.0.0",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.6.0"
+  }
+}
