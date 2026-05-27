@@ -139,7 +139,9 @@ async function publishToInstagram(
     connectedAccounts: { instagram: params.connectedAccountId },
   });
 
-  const igUserRes = await session.execute("INSTAGRAM_GET_IG_USER", {});
+  const igUserRes = await session.execute("INSTAGRAM_GET_USER_INFO", {
+    ig_user_id: "me",
+  });
   const igUserData = ((igUserRes as Record<string, unknown>)?.data ??
     igUserRes) as Record<string, unknown>;
   const igUserId = String(igUserData?.id ?? "");
@@ -147,18 +149,22 @@ async function publishToInstagram(
     throw new Error("Could not resolve Instagram user ID");
   }
 
-  const videoUrl = await generateSignedUrl(params.gcsKey, 30 * 60);
+  const fileDescriptor = await stageToComposio(
+    params.gcsKey,
+    "INSTAGRAM_POST_IG_USER_MEDIA",
+    "instagram",
+  );
 
   const containerResult = await session.execute("INSTAGRAM_POST_IG_USER_MEDIA", {
     ig_user_id: igUserId,
-    video_url: videoUrl,
+    video_file: fileDescriptor,
     caption: params.description || params.title || "",
     media_type: "REELS",
   });
 
-  const creationId =
-    (containerResult as Record<string, unknown>)?.creation_id ??
-    (containerResult as Record<string, unknown>)?.id;
+  const containerObj = (containerResult ?? {}) as Record<string, unknown>;
+  const containerData = (containerObj.data ?? containerObj) as Record<string, unknown>;
+  const creationId = String(containerData.creation_id ?? containerData.id ?? "");
 
   if (!creationId) {
     throw new Error(`Instagram container creation failed: ${JSON.stringify(containerResult)}`);
